@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reflection Room — first reflection planner</title>
+  <meta name="description" content="Calculate first reflection points on the four walls of a room and plan where to install acoustic panels. Metric plan view with export and print.">
+  <meta name="color-scheme" content="light">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="print-header" aria-hidden="true">
+    <div>
+      <strong>Reflection Room</strong>
+      <span>First reflection plan</span>
+    </div>
+    <div id="printMeta">—</div>
+  </div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="2.5" y="3.5" width="19" height="17" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M6.5 15.5 12 3.5l5.5 12" fill="none" stroke="oklch(0.53 0.17 38.6)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="6.5" cy="15.5" r="1.7" fill="oklch(0.53 0.17 38.6)"/>
+          <circle cx="17.5" cy="15.5" r="1.7" fill="oklch(0.52 0.12 240)"/>
+          <circle cx="12" cy="3.5" r="1.5" fill="oklch(1 0 0)" stroke="oklch(0.53 0.17 38.6)" stroke-width="1.4"/>
+        </svg>
+        <div class="brand-copy">
+          <span class="brand-name">Reflection Room</span>
+          <span class="brand-sub">First reflection planner</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-quiet" id="helpBtn" type="button" aria-haspopup="dialog" aria-label="How it works">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8.1 7.6a2 2 0 1 1 3.2 1.6c-.8.5-1.3 1-1.3 1.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="13.9" r=".9" fill="currentColor"/></svg>
+          <span class="btn-label">How it works</span>
+        </button>
+        <button class="btn btn-secondary" id="printBtn" type="button" aria-label="Print plan">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 7V3.5h8V7M6 14.5H4.5A1.5 1.5 0 0 1 3 13V9a1.5 1.5 0 0 1 1.5-1.5h11A1.5 1.5 0 0 1 17 9v4a1.5 1.5 0 0 1-1.5 1.5H14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="6" y="11" width="8" height="5.5" rx=".7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span class="btn-label">Print</span>
+        </button>
+        <button class="btn btn-primary" id="exportBtn" type="button" aria-label="Export plan as SVG">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9m0 0 3.2-3.2M10 12 6.8 8.8M4 14.5v1A1.5 1.5 0 0 0 5.5 17h9a1.5 1.5 0 0 0 1.5-1.5v-1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="btn-label">Export SVG</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="stage-panel" aria-labelledby="stageTitle">
+        <div class="stage-head">
+          <div class="stage-heading">
+            <h1 id="stageTitle">Room plan</h1>
+            <p>Front wall at top. Drag the source or listener to move it.</p>
+          </div>
+          <div class="readout">
+            <div class="readout-item">
+              <span class="readout-label">Direct</span>
+              <span class="readout-value" id="readDirect">—</span>
+            </div>
+            <div class="readout-item">
+              <span class="readout-label">Earliest reflection</span>
+              <span class="readout-value" id="readEarliest">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stage" id="stage">
+          <svg id="plan" xmlns="http://www.w3.org/2000/svg" role="group" aria-labelledby="planTitle" aria-describedby="planDesc">
+            <title id="planTitle">Room plan with first reflection points</title>
+            <desc id="planDesc">A top-down room with a source and listener. Reflection paths and panel zones are shown on the four walls.</desc>
+          </svg>
+          <div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+        </div>
+
+        <div class="stage-foot">
+          <p class="hint"><kbd>Tab</kbd> to a marker. <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> nudge 1 cm, <kbd>Shift</kbd> 10 cm.</p>
+          <p class="hint">Plan view. Ceiling and floor reflections are not shown.</p>
+        </div>
+      </section>
+
+      <aside class="inspector" aria-label="Room setup and results">
+        <div class="inspector-inner">
+          <section class="section" aria-labelledby="geometryTitle">
+            <div class="section-head">
+              <h2 id="geometryTitle">Room &amp; placement</h2>
+              <span class="section-unit">metres</span>
+            </div>
+            <div class="field-row">
+              <label class="field">
+                <span class="field-label">Room width</span>
+                <span class="input-shell">
+                  <input id="roomW" type="number" min="2" max="12" step="0.1" inputmode="decimal" autocomplete="off">
+                  <span class="unit">m</span>
+                </span>
+              </label>
+              <label class="field">
+                <span class="field-label">Room depth</span>
+                <span class="input-shell">
+                  <input id="roomD" type="number" min="2" max="12" step="0.1" inputmode="decimal" autocomplete="off">
+                  <span class="unit">m</span>
+                </span>
+              </label>
+            </div>
+
+            <div class="placement">
+              <div class="field-block">
+                <span class="field-label"><span class="dot dot-source" aria-hidden="true"></span>Source</span>
+                <div class="pair">
+                  <label class="mini-field">
+                    <span class="sr-only">Source x in metres</span>
+                    <span class="input-shell"><span class="axis">x</span><input id="sourceX" type="number" min="0.06" step="0.01" inputmode="decimal" autocomplete="off"><span class="unit">m</span></span>
+                  </label>
+                  <label class="mini-field">
+                    <span class="sr-only">Source y in metres</span>
+                    <span class="input-shell"><span class="axis">y</span><input id="sourceY" type="number" min="0.06" step="0.01" inputmode="decimal" autocomplete="off"><span class="unit">m</span></span>
+                  </label>
+                </div>
+              </div>
+              <div class="field-block">
+                <span class="field-label"><span class="dot dot-listener" aria-hidden="true"></span>Listener</span>
+                <div class="pair">
+                  <label class="mini-field">
+                    <span class="sr-only">Listener x in metres</span>
+                    <span class="input-shell"><span class="axis">x</span><input id="listenerX" type="number" min="0.06" step="0.01" inputmode="decimal" autocomplete="off"><span class="unit">m</span></span>
+                  </label>
+                  <label class="mini-field">
+                    <span class="sr-only">Listener y in metres</span>
+                    <span class="input-shell"><span class="axis">y</span><input id="listenerY" type="number" min="0.06" step="0.01" inputmode="decimal" autocomplete="off"><span class="unit">m</span></span>
+                  </label>
+                </div>
+              </div>
+              <p class="note">x runs left to right. y runs from the front wall to the rear wall.</p>
+            </div>
+          </section>
+
+          <section class="section" aria-labelledby="panelTitle">
+            <div class="section-head">
+              <h2 id="panelTitle">Panel plan</h2>
+              <span class="section-unit">centimetres</span>
+            </div>
+            <div class="field">
+              <div class="range-head">
+                <label for="panelWidth">Panel width</label>
+                <output id="panelWidthOut" for="panelWidth">60 cm</output>
+              </div>
+              <input id="panelWidth" type="range" min="30" max="150" step="5" value="60">
+              <div class="range-scale"><span>30</span><span>150 cm</span></div>
+            </div>
+
+            <fieldset class="wall-fieldset">
+              <legend>Treat these walls</legend>
+              <div class="wall-grid">
+                <label class="wall-toggle"><input id="wallLeft" type="checkbox" checked><span class="wall-glyph wall-glyph-left" aria-hidden="true"></span><span>Left</span></label>
+                <label class="wall-toggle"><input id="wallRight" type="checkbox" checked><span class="wall-glyph wall-glyph-right" aria-hidden="true"></span><span>Right</span></label>
+                <label class="wall-toggle"><input id="wallFront" type="checkbox" checked><span class="wall-glyph wall-glyph-front" aria-hidden="true"></span><span>Front</span></label>
+                <label class="wall-toggle"><input id="wallRear" type="checkbox" checked><span class="wall-glyph wall-glyph-rear" aria-hidden="true"></span><span>Rear</span></label>
+              </div>
+            </fieldset>
+
+            <div class="switch-list">
+              <label class="switch"><input id="showPanels" type="checkbox" checked><span class="switch-track" aria-hidden="true"></span><span>Panel zones</span></label>
+              <label class="switch"><input id="showGrid" type="checkbox" checked><span class="switch-track" aria-hidden="true"></span><span>Grid</span></label>
+            </div>
+          </section>
+
+          <section class="section section-results" aria-labelledby="resultsTitle">
+            <div class="section-head">
+              <h2 id="resultsTitle">First-order reflections</h2>
+              <span class="section-unit" id="wallCount">4 walls</span>
+            </div>
+            <div class="table-wrap" id="tableWrap">
+              <table class="results-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Wall</th>
+                    <th scope="col">Position</th>
+                    <th scope="col">Path</th>
+                    <th scope="col">Delay</th>
+                    <th scope="col">Angle</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsBody"></tbody>
+              </table>
+            </div>
+            <div class="empty" id="resultsEmpty" hidden>
+              <strong>No walls selected.</strong>
+              <span>Turn on at least one wall to calculate its reflection point.</span>
+            </div>
+            <p class="table-note">Delay is relative to the direct sound. Angle is measured from the wall normal. Panel zones are centred on each point.</p>
+            <div class="warning" id="warning" hidden></div>
+          </section>
+        </div>
+
+        <footer class="inspector-foot">
+          <button class="btn btn-quiet btn-small" id="resetBtn" type="button">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 8.5A6 6 0 1 1 5 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M4.5 4.5v4h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Reset layout
+          </button>
+          <span class="saved">Saved in this browser</span>
+        </footer>
+      </aside>
+    </main>
+  </div>
+
+  <dialog class="help-dialog" id="helpDialog" aria-labelledby="helpTitle">
+    <div class="help-body">
+      <div class="help-head">
+        <h2 id="helpTitle">How the points are found</h2>
+        <button class="icon-btn" id="helpClose" type="button" aria-label="Close">×</button>
+      </div>
+
+      <div class="help-diagram">
+        <svg viewBox="0 0 360 200" role="img" aria-label="Diagram of the mirror source method">
+          <rect x="36" y="86" width="288" height="86" fill="oklch(1 0 0)" stroke="oklch(0.225 0.016 39)" stroke-width="2.5"/>
+          <line x1="104" y1="22" x2="256" y2="150" stroke="oklch(0.62 0.19 38.6)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".55"/>
+          <path d="M104 150 180 86l76 64" fill="none" stroke="oklch(0.53 0.17 38.6)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="104" cy="22" r="6" fill="oklch(1 0 0)" stroke="oklch(0.53 0.17 38.6)" stroke-width="2" stroke-dasharray="3 2"/>
+          <circle cx="104" cy="150" r="7" fill="oklch(0.53 0.17 38.6)"/>
+          <circle cx="256" cy="150" r="7" fill="oklch(0.52 0.12 240)"/>
+          <circle cx="180" cy="86" r="6" fill="oklch(1 0 0)" stroke="oklch(0.53 0.17 38.6)" stroke-width="2.5"/>
+          <g font-family="Segoe UI, system-ui, sans-serif" font-size="10" fill="oklch(0.43 0.014 39)">
+            <text x="104" y="12" text-anchor="middle">mirror source</text>
+            <text x="180" y="73" text-anchor="middle" fill="oklch(0.225 0.016 39)" font-weight="600">reflection point</text>
+            <text x="104" y="176" text-anchor="middle">source</text>
+            <text x="256" y="176" text-anchor="middle">listener</text>
+          </g>
+        </svg>
+      </div>
+
+      <ol class="help-steps">
+        <li><strong>Mirror the source.</strong> Reflect the speaker across the wall, outside the room.</li>
+        <li><strong>Draw to the listener.</strong> A straight line from the mirrored source to the listener crosses the wall.</li>
+        <li><strong>Mark the crossing.</strong> That point is the first reflection point. The incoming and outgoing angles match.</li>
+      </ol>
+      <p>Delays use 343 m/s, the speed of sound at about 20 °C. This plan covers the four walls; ceiling and floor points follow the same mirror method.</p>
+      <p class="help-kbd">Drag a marker, or focus it and use the arrow keys. Shift moves 10 cm. Numeric fields accept exact values.</p>
+      <button class="btn btn-primary" id="helpDone" type="button">Got it</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="sr-only" id="live" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
